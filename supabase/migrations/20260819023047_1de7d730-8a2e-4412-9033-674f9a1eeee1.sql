@@ -1,0 +1,1 @@
+update public.settings set whatsapp_number = '8801306383938' where id = 1;

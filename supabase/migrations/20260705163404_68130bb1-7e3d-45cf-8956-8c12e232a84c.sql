@@ -1,0 +1,1 @@
+UPDATE public.settings SET whatsapp_number = '8801334926940', call_number = '01334-926940', updated_at = now() WHERE id = 1;

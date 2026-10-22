@@ -1,0 +1,1 @@
+DELETE FROM public.orders WHERE full_name = 'Test User' AND phone = '01700000000';
