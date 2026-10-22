@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { BLOG_POSTS } from "@/lib/blog";
+import { PRODUCTS } from "@/lib/catalog";
 import type {} from "@tanstack/react-start";
 
 const BASE_URL = "https://dibedex.com";
@@ -20,6 +21,8 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/chittagong", changefreq: "monthly", priority: "0.8" },
           { path: "/blog", changefreq: "weekly", priority: "0.7" },
           ...BLOG_POSTS.map((p) => ({ path: `/blog/${p.slug}`, changefreq: "monthly" as const, priority: "0.6" })),
+          { path: "/products", changefreq: "weekly", priority: "0.8" },
+          ...PRODUCTS.map((p) => ({ path: `/product/${p.slug}`, changefreq: "weekly" as const, priority: "0.7" })),
           { path: "/contact", changefreq: "monthly", priority: "0.7" },
           { path: "/privacy-policy", changefreq: "yearly", priority: "0.4" },
           { path: "/terms-and-conditions", changefreq: "yearly", priority: "0.4" },

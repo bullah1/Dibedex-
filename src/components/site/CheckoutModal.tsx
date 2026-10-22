@@ -3,6 +3,7 @@ import { X } from "lucide-react";
 import { CheckoutSection } from "@/components/site/Checkout";
 import type { SiteSettings } from "@/lib/site";
 import { closeCheckout, openCheckout, useCheckoutOpen } from "@/lib/checkout-modal";
+import { setIncludeDibedex } from "@/lib/cart";
 
 /**
  * Popup checkout. Any link to #order (or [data-checkout-open]) opens this
@@ -19,6 +20,8 @@ export function CheckoutModal({ settings }: { settings: SiteSettings }) {
       const el = target?.closest<HTMLElement>('a[href="#order"], a[href$="/#order"], [data-checkout-open]');
       if (!el) return;
       ev.preventDefault();
+      // Every #order link on the site is a Dibedex call-to-action.
+      if (!el.hasAttribute("data-cart-checkout")) setIncludeDibedex(true);
       openCheckout();
     };
     document.addEventListener("click", onClick);
@@ -27,7 +30,10 @@ export function CheckoutModal({ settings }: { settings: SiteSettings }) {
 
   // Deep link support: /#order opens the popup.
   useEffect(() => {
-    if (window.location.hash === "#order") openCheckout();
+    if (window.location.hash === "#order") {
+      setIncludeDibedex(true);
+      openCheckout();
+    }
   }, []);
 
   // Lock background scroll + ESC to close.

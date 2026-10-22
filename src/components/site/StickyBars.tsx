@@ -4,6 +4,7 @@ import { buildWhatsAppLink } from "@/lib/site";
 import { useSelectedPackage } from "@/lib/packages";
 import { useCheckoutSubmitting } from "@/lib/checkout-state";
 import { openCheckout, useCheckoutOpen } from "@/lib/checkout-modal";
+import { setIncludeDibedex } from "@/lib/cart";
 
 export function MobileStickyBar({
   callNumber,
@@ -61,7 +62,10 @@ export function MobileStickyBar({
         </a>
         <button
           type="button"
-          onClick={() => openCheckout()}
+          onClick={() => {
+            setIncludeDibedex(true);
+            openCheckout();
+          }}
           disabled={submitting}
           className="group relative flex min-w-0 flex-1 items-center justify-center gap-2 overflow-hidden rounded-2xl px-3 text-sm font-bold text-white shadow-md transition-transform active:scale-[0.98] disabled:opacity-70"
           style={{ backgroundColor: "#0B6B4F", boxShadow: "0 8px 22px rgba(11,107,79,0.28)" }}

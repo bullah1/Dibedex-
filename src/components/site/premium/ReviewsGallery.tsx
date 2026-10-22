@@ -80,14 +80,8 @@ export function ReviewsGallery({ testimonials }: { testimonials: Testimonial[] }
           </p>
           <div className="mt-2 flex flex-wrap items-end justify-between gap-3">
             <h2 className="text-[26px] font-semibold leading-tight tracking-[-0.02em] md:text-[36px]">
-              ১০,০০০+ গ্রাহকের আস্থা
+              গ্রাহকদের মতামত
             </h2>
-            <div className="flex items-center gap-2">
-              <Stars />
-              <span className="text-[13.5px] font-medium" style={{ color: SUBTLE }}>
-                ৪.৮ / ৫ গড় রেটিং
-              </span>
-            </div>
           </div>
         </Reveal>
 

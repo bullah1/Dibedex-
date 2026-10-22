@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
+import { Menu, ShoppingBag, X } from "lucide-react";
 import { useSelectedPackage } from "@/lib/packages";
+import { cartCount, useCart } from "@/lib/cart";
+import { openCheckout } from "@/lib/checkout-modal";
 
 const INK = "#1D1D1F";
 const HAIRLINE = "#E8E8ED";
@@ -9,16 +11,19 @@ const ACCENT = "#0B6B4F";
 const SANS = "'Inter','Hind Siliguri','Noto Sans Bengali',system-ui,sans-serif";
 
 const links = [
-  { href: "#benefits", label: "উপকারিতা" },
-  { href: "#details", label: "ডিটেইলস" },
-  { href: "#reviews", label: "রিভিউ" },
-  { href: "#faq", label: "FAQ" },
+  { href: "/#benefits", label: "উপকারিতা" },
+  { href: "/#details", label: "ডিটেইলস" },
+  { href: "/#reviews", label: "রিভিউ" },
+  { href: "/#faq", label: "FAQ" },
+  { href: "/products", label: "আরও প্রোডাক্ট" },
 ];
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const { pkg } = useSelectedPackage();
+  const cart = useCart();
+  const count = cartCount(cart);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -55,8 +60,25 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {count > 0 && (
+            <button
+              type="button"
+              onClick={() => openCheckout()}
+              aria-label={`কার্ট — ${count}টি প্রোডাক্ট`}
+              className="relative grid h-9 w-9 place-items-center rounded-full"
+              style={{ border: `1px solid ${HAIRLINE}`, color: INK }}
+            >
+              <ShoppingBag className="h-[17px] w-[17px]" />
+              <span
+                className="absolute -right-1 -top-1 grid h-[18px] min-w-[18px] place-items-center rounded-full px-1 text-[10px] font-bold text-white"
+                style={{ backgroundColor: ACCENT }}
+              >
+                {count}
+              </span>
+            </button>
+          )}
           <a
-            href="#order"
+            href="/#order"
             className="flex h-9 items-center rounded-full px-4 text-[13.5px] font-semibold text-white transition-transform active:scale-95"
             style={{ backgroundColor: ACCENT }}
           >

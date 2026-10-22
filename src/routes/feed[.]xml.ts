@@ -29,7 +29,7 @@ export const Route = createFileRoute("/feed.xml")({
           );
 
         const desc =
-          "Bangladesh's #1 Best Selling Ayurvedic diabetes support. Syzygium Jambolanum (jamun seed) 500 mg capsules — helps complement blood sugar management, healthy lifestyle and doctor-guided routine. 10,000+ happy customers, 4.8★ rating. Cash on Delivery all over Bangladesh.";
+          "Ayurvedic diabetes support by Index Laboratories Ltd. Syzygium Jambolanum (jamun seed) 500 mg capsules — helps complement blood sugar management, healthy lifestyle and doctor-guided routine. Cash on Delivery all over Bangladesh.";
 
         const entries = items
           .map(

@@ -66,18 +66,33 @@ export type Database = {
         Row: {
           admin_password: string
           id: number
+          password_hash: string | null
           updated_at: string
         }
         Insert: {
           admin_password?: string
           id?: number
+          password_hash?: string | null
           updated_at?: string
         }
         Update: {
           admin_password?: string
           id?: number
+          password_hash?: string | null
           updated_at?: string
         }
+        Relationships: []
+      }
+      admin_login_attempts: {
+        Row: { created_at: string; id: number; ip: string }
+        Insert: { created_at?: string; id?: never; ip: string }
+        Update: { created_at?: string; id?: never; ip?: string }
+        Relationships: []
+      }
+      admin_sessions: {
+        Row: { created_at: string; expires_at: string; token_hash: string }
+        Insert: { created_at?: string; expires_at: string; token_hash: string }
+        Update: { created_at?: string; expires_at?: string; token_hash?: string }
         Relationships: []
       }
       analytics_events: {
@@ -122,6 +137,7 @@ export type Database = {
           district: string
           full_name: string
           id: string
+          items: Json
           order_note: string | null
           payment_method: string
           phone: string
@@ -143,6 +159,7 @@ export type Database = {
           district: string
           full_name: string
           id?: string
+          items?: Json
           order_note?: string | null
           payment_method?: string
           phone: string
@@ -164,6 +181,7 @@ export type Database = {
           district?: string
           full_name?: string
           id?: string
+          items?: Json
           order_note?: string | null
           payment_method?: string
           phone?: string

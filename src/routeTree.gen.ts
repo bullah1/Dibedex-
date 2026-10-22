@@ -17,12 +17,14 @@ import { Route as DhakaRouteImport } from './routes/dhaka'
 import { Route as DnsAuditRouteImport } from './routes/dns-audit'
 import { Route as FeedDotxmlRouteImport } from './routes/feed[.]xml'
 import { Route as PrivacyPolicyRouteImport } from './routes/privacy-policy'
+import { Route as ProductsRouteImport } from './routes/products'
 import { Route as RefundPolicyRouteImport } from './routes/refund-policy'
 import { Route as ShippingPolicyRouteImport } from './routes/shipping-policy'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsAndConditionsRouteImport } from './routes/terms-and-conditions'
 import { Route as BlogIndexRouteImport } from './routes/blog.index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
+import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as ApiPublicAbandonedRouteImport } from './routes/api/public/abandoned'
 import { Route as ApiPublicTrackRouteImport } from './routes/api/public/track'
 
@@ -66,6 +68,11 @@ const PrivacyPolicyRoute = PrivacyPolicyRouteImport.update({
   path: '/privacy-policy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductsRoute = ProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RefundPolicyRoute = RefundPolicyRouteImport.update({
   id: '/refund-policy',
   path: '/refund-policy',
@@ -96,6 +103,11 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProductSlugRoute = ProductSlugRouteImport.update({
+  id: '/product/$slug',
+  path: '/product/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicAbandonedRoute = ApiPublicAbandonedRouteImport.update({
   id: '/api/public/abandoned',
   path: '/api/public/abandoned',
@@ -116,11 +128,13 @@ export interface FileRoutesByFullPath {
   '/dns-audit': typeof DnsAuditRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
+  '/products': typeof ProductsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/shipping-policy': typeof ShippingPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/product/$slug': typeof ProductSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/api/public/abandoned': typeof ApiPublicAbandonedRoute
   '/api/public/track': typeof ApiPublicTrackRoute
@@ -134,11 +148,13 @@ export interface FileRoutesByTo {
   '/dns-audit': typeof DnsAuditRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
+  '/products': typeof ProductsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/shipping-policy': typeof ShippingPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/product/$slug': typeof ProductSlugRoute
   '/blog': typeof BlogIndexRoute
   '/api/public/abandoned': typeof ApiPublicAbandonedRoute
   '/api/public/track': typeof ApiPublicTrackRoute
@@ -153,11 +169,13 @@ export interface FileRoutesById {
   '/dns-audit': typeof DnsAuditRoute
   '/feed.xml': typeof FeedDotxmlRoute
   '/privacy-policy': typeof PrivacyPolicyRoute
+  '/products': typeof ProductsRoute
   '/refund-policy': typeof RefundPolicyRoute
   '/shipping-policy': typeof ShippingPolicyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms-and-conditions': typeof TermsAndConditionsRoute
   '/blog/$slug': typeof BlogSlugRoute
+  '/product/$slug': typeof ProductSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/api/public/abandoned': typeof ApiPublicAbandonedRoute
   '/api/public/track': typeof ApiPublicTrackRoute
@@ -173,11 +191,13 @@ export interface FileRouteTypes {
     | '/dns-audit'
     | '/feed.xml'
     | '/privacy-policy'
+    | '/products'
     | '/refund-policy'
     | '/shipping-policy'
     | '/sitemap.xml'
     | '/terms-and-conditions'
     | '/blog/$slug'
+    | '/product/$slug'
     | '/blog/'
     | '/api/public/abandoned'
     | '/api/public/track'
@@ -191,11 +211,13 @@ export interface FileRouteTypes {
     | '/dns-audit'
     | '/feed.xml'
     | '/privacy-policy'
+    | '/products'
     | '/refund-policy'
     | '/shipping-policy'
     | '/sitemap.xml'
     | '/terms-and-conditions'
     | '/blog/$slug'
+    | '/product/$slug'
     | '/blog'
     | '/api/public/abandoned'
     | '/api/public/track'
@@ -209,11 +231,13 @@ export interface FileRouteTypes {
     | '/dns-audit'
     | '/feed.xml'
     | '/privacy-policy'
+    | '/products'
     | '/refund-policy'
     | '/shipping-policy'
     | '/sitemap.xml'
     | '/terms-and-conditions'
     | '/blog/$slug'
+    | '/product/$slug'
     | '/blog/'
     | '/api/public/abandoned'
     | '/api/public/track'
@@ -228,11 +252,13 @@ export interface RootRouteChildren {
   DnsAuditRoute: typeof DnsAuditRoute
   FeedDotxmlRoute: typeof FeedDotxmlRoute
   PrivacyPolicyRoute: typeof PrivacyPolicyRoute
+  ProductsRoute: typeof ProductsRoute
   RefundPolicyRoute: typeof RefundPolicyRoute
   ShippingPolicyRoute: typeof ShippingPolicyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsAndConditionsRoute: typeof TermsAndConditionsRoute
   BlogSlugRoute: typeof BlogSlugRoute
+  ProductSlugRoute: typeof ProductSlugRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ApiPublicAbandonedRoute: typeof ApiPublicAbandonedRoute
   ApiPublicTrackRoute: typeof ApiPublicTrackRoute
@@ -296,6 +322,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyPolicyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/products': {
+      id: '/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof ProductsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/refund-policy': {
       id: '/refund-policy'
       path: '/refund-policy'
@@ -338,6 +371,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/product/$slug': {
+      id: '/product/$slug'
+      path: '/product/$slug'
+      fullPath: '/product/$slug'
+      preLoaderRoute: typeof ProductSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/abandoned': {
       id: '/api/public/abandoned'
       path: '/api/public/abandoned'
@@ -364,11 +404,13 @@ const rootRouteChildren: RootRouteChildren = {
   DnsAuditRoute: DnsAuditRoute,
   FeedDotxmlRoute: FeedDotxmlRoute,
   PrivacyPolicyRoute: PrivacyPolicyRoute,
+  ProductsRoute: ProductsRoute,
   RefundPolicyRoute: RefundPolicyRoute,
   ShippingPolicyRoute: ShippingPolicyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsAndConditionsRoute: TermsAndConditionsRoute,
   BlogSlugRoute: BlogSlugRoute,
+  ProductSlugRoute: ProductSlugRoute,
   BlogIndexRoute: BlogIndexRoute,
   ApiPublicAbandonedRoute: ApiPublicAbandonedRoute,
   ApiPublicTrackRoute: ApiPublicTrackRoute,

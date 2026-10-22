@@ -62,13 +62,8 @@ export function ProductHero({ whatsappNumber }: { whatsappNumber: string }) {
           </h1>
 
           <div className="mt-2.5 flex items-center gap-2">
-            <span className="flex" style={{ color: "#F5A524" }}>
-              {Array.from({ length: 5 }).map((_, i) => (
-                <Star key={i} className="h-[15px] w-[15px] fill-current" strokeWidth={0} />
-              ))}
-            </span>
             <span className="text-[13px] font-medium" style={{ color: SUBTLE }}>
-              ৪.৮ · ১০,০০০+ গ্রাহক
+              প্রস্তুতকারক: Index Laboratories Ltd. · আয়ুর্বেদিক ফর্মুলা
             </span>
           </div>
 

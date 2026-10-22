@@ -9,6 +9,7 @@ import { BenefitsGrid } from "@/components/site/premium/BenefitsGrid";
 import { ProductDetails } from "@/components/site/premium/ProductDetails";
 import { ReviewsGallery } from "@/components/site/premium/ReviewsGallery";
 import { PremiumFaq } from "@/components/site/premium/PremiumFaq";
+import { MoreProducts } from "@/components/site/MoreProducts";
 import { CheckoutModal } from "@/components/site/CheckoutModal";
 import { MobileStickyBar, FloatingWhatsApp } from "@/components/site/StickyBars";
 import {
@@ -26,7 +27,7 @@ import { ADSENSE_SLOTS } from "@/lib/adsense";
 const PRODUCT_TITLE =
   "Dibedex 500 — Price in Bangladesh, Review, Side Effects (Bangla) | ডিবেডেক্স ৫০০ ক্যাপসুল অর্ডার";
 const PRODUCT_DESC =
-  "Dibedex 500 mg Capsule — Bangladesh এর #1 Best Selling Ayurvedic ডায়াবেটিস সাপোর্ট। Dibedex 500 price in Bangladesh ৳৩৫০ থেকে শুরু। Review, side effects (bangla), সঠিক নিয়মে সেবন ও অর্ডার — সারা বাংলাদেশে Cash on Delivery। ১০,০০০+ সন্তুষ্ট গ্রাহক, ৪.৮★ রেটিং।";
+  "Dibedex 500 mg Capsule — জামুন বীজের নির্যাসে তৈরি Ayurvedic ডায়াবেটিস সাপোর্ট। Dibedex 500 price in Bangladesh ৳৩৫০ থেকে শুরু। Review, side effects (bangla), সঠিক নিয়মে সেবন ও অর্ডার — সারা বাংলাদেশে Cash on Delivery।";
 const PRODUCT_IMG =
   "https://dibedex.com/__l5e/assets-v1/8eb85126-2eb4-4bfd-8ec7-dfa0773f55e2/dibedex-real.webp";
 
@@ -51,7 +52,7 @@ export const Route = createFileRoute("/")({
       { property: "og:url", content: "https://dibedex.com/" },
       { property: "og:type", content: "product" },
       { property: "og:image", content: PRODUCT_IMG },
-      { property: "og:image:alt", content: "Dibedex 500 mg — Bangladesh's #1 Best Selling Diabetes Support Capsule" },
+      { property: "og:image:alt", content: "Dibedex 500 mg — Ayurvedic Diabetes Support Capsule" },
       { property: "og:image:width", content: "1024" },
       { property: "og:image:height", content: "1024" },
       { property: "product:brand", content: "Dibedex" },
@@ -104,36 +105,13 @@ export const Route = createFileRoute("/")({
           url: "https://dibedex.com/",
           image: [PRODUCT_IMG],
           brand: { "@type": "Brand", name: "Dibedex" },
-          manufacturer: { "@type": "Organization", name: "Dibedex" },
+          manufacturer: { "@type": "Organization", name: "Index Laboratories Ltd." },
           category: "Health & Beauty > Health Care > Ayurvedic Medicine",
           sku: "DBX-SYZ-500",
           mpn: "DBX-SYZ-500",
-          award: "Bangladesh's #1 Best Selling Ayurvedic Diabetes Support 2025",
           description:
-            "Bangladesh এর #1 Best Selling Ayurvedic ডায়াবেটিস সাপোর্ট ক্যাপসুল। প্রাকৃতিক জামুন (Syzygium Jambolanum) বীজের নির্যাসে তৈরি — ব্লাড সুগার ম্যানেজমেন্ট, স্বাস্থ্যকর জীবনযাপন ও ডাক্তারের নির্দেশিত রুটিনের সহায়ক।",
+            "Ayurvedic ডায়াবেটিস সাপোর্ট ক্যাপসুল। প্রাকৃতিক জামুন (Syzygium Jambolanum) বীজের নির্যাসে তৈরি — ব্লাড সুগার ম্যানেজমেন্ট, স্বাস্থ্যকর জীবনযাপন ও ডাক্তারের নির্দেশিত রুটিনের সহায়ক।",
           audience: { "@type": "PeopleAudience", suggestedMinAge: 18, geographicArea: { "@type": "Country", name: "Bangladesh" } },
-          aggregateRating: {
-            "@type": "AggregateRating",
-            ratingValue: "4.8",
-            bestRating: "5",
-            worstRating: "1",
-            ratingCount: "10247",
-            reviewCount: "10000",
-          },
-          review: [
-            {
-              "@type": "Review",
-              reviewRating: { "@type": "Rating", ratingValue: "5", bestRating: "5" },
-              author: { "@type": "Person", name: "Rahim Uddin" },
-              reviewBody: "৩ মাস ব্যবহার করেছি, sugar level অনেক ভালো আছে। Best product!",
-            },
-            {
-              "@type": "Review",
-              reviewRating: { "@type": "Rating", ratingValue: "5", bestRating: "5" },
-              author: { "@type": "Person", name: "Nasima Akter" },
-              reviewBody: "Original product, home delivery পেয়েছি। সবাইকে recommend করছি।",
-            },
-          ],
           productID: "dbx-syz-500-30",
           inProductGroupWithID: "dbx-syz-500",
           offers: [
@@ -210,7 +188,7 @@ export const Route = createFileRoute("/")({
               name: "Dibedex 500 mg review কেমন?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "১০,০০০+ সন্তুষ্ট গ্রাহক Dibedex 500 mg ব্যবহার করে ৪.৮★ রেটিং দিয়েছেন। নিয়মিত সেবনে ব্লাড সুগার ম্যানেজমেন্টে ইতিবাচক ফলাফল পাওয়ার রিভিউ পাওয়া গেছে।",
+                text: "গ্রাহকদের মতামত আমাদের রিভিউ সেকশনে দেখতে পারেন। ফলাফল ব্যক্তিভেদে ভিন্ন হতে পারে — নিয়মিত সেবনের পাশাপাশি খাদ্যাভ্যাস, ব্যায়াম ও চিকিৎসকের পরামর্শ মেনে চলুন।",
               },
             },
 
@@ -243,7 +221,7 @@ export const Route = createFileRoute("/")({
               name: "Cash on Delivery (COD) আছে?",
               acceptedAnswer: {
                 "@type": "Answer",
-                text: "হ্যাঁ। আপনি পণ্য হাতে পেয়ে টাকা দিতে পারবেন। bKash ও Nagad পেমেন্টও গ্রহণযোগ্য।",
+                text: "হ্যাঁ। আপনি পণ্য হাতে পেয়ে টাকা দিতে পারবেন — কোনো অগ্রিম পেমেন্ট লাগে না।",
               },
             },
             {
@@ -314,6 +292,7 @@ function LandingPage() {
           callNumber={settings.call_number}
           whatsappNumber={settings.whatsapp_number}
         />
+        <MoreProducts />
       </main>
       <AdSlot slot={ADSENSE_SLOTS.homeFooter} />
       <SiteFooter

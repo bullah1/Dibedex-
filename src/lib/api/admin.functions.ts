@@ -1,51 +1,44 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-const ADMIN_FALLBACK = "dibedex2025";
-
-async function getAdminPassword(): Promise<string> {
-  try {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
-      .from("admin_config")
-      .select("admin_password")
-      .eq("id", 1)
-      .maybeSingle();
-    if (error) throw error;
-    if (data?.admin_password) return data.admin_password;
-  } catch {
-    // fall through to env / fallback
-  }
-  return process.env.ADMIN_PASSWORD || ADMIN_FALLBACK;
-}
-
+// Auth helpers live in a .server.ts file so they never ship to the browser.
 async function assertAdmin(token: string) {
-  const pw = await getAdminPassword();
-  if (!token || token !== pw) {
-    throw new Error("Unauthorized");
-  }
+  const { assertAdmin: check } = await import("./admin-auth.server");
+  await check(token);
 }
 
 export const adminLogin = createServerFn({ method: "POST" })
   .inputValidator(z.object({ password: z.string().min(1).max(200) }))
   .handler(async ({ data }) => {
-    const pw = await getAdminPassword();
-    if (data.password !== pw) {
+    const auth = await import("./admin-auth.server");
+    const ip = auth.clientIp();
+    await auth.assertLoginAllowed(ip);
+    const ok = await auth.checkPassword(data.password);
+    if (!ok) {
+      await auth.recordFailedLogin(ip);
       throw new Error("Invalid password");
     }
-    return { token: data.password };
+    return { token: await auth.createSession() };
   });
 
+export const adminLogout = createServerFn({ method: "POST" })
+  .inputValidator(z.object({ token: z.string().max(200) }))
+  .handler(async ({ data }) => {
+    const { revokeSession } = await import("./admin-auth.server");
+    await revokeSession(data.token);
+    return { ok: true };
+  });
 
 export const adminListOrders = createServerFn({ method: "POST" })
-  .inputValidator(z.object({ token: z.string() }))
+  .inputValidator(z.object({ token: z.string(), limit: z.number().int().min(1).max(5000).optional() }))
   .handler(async ({ data }) => {
     await assertAdmin(data.token);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: orders, error } = await supabaseAdmin
       .from("orders")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
+      .limit(data.limit ?? 500);
     if (error) throw new Error(error.message);
     return { orders: orders ?? [] };
   });
@@ -286,19 +279,35 @@ export const adminDeleteTestimonial = createServerFn({ method: "POST" })
   });
 
 export const adminChangePassword = createServerFn({ method: "POST" })
-  .inputValidator(z.object({
-    token: z.string(),
-    newPassword: z.string().min(4).max(200),
-  }))
+  .inputValidator(
+    z.object({
+      token: z.string(),
+      currentPassword: z.string().min(1).max(200),
+      newPassword: z.string().min(8).max(200),
+    }),
+  )
   .handler(async ({ data }) => {
     await assertAdmin(data.token);
+    const auth = await import("./admin-auth.server");
+    if (!(await auth.checkPassword(data.currentPassword))) {
+      throw new Error("Current password ভুল");
+    }
+    if (auth.isBlockedPassword(data.newPassword)) {
+      throw new Error("এই পাসওয়ার্ড ব্যবহার করা যাবে না");
+    }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("admin_config")
-      .update({ admin_password: data.newPassword, updated_at: new Date().toISOString() })
+      .update({
+        password_hash: await auth.hashPassword(data.newPassword),
+        admin_password: "",
+        updated_at: new Date().toISOString(),
+      })
       .eq("id", 1);
     if (error) throw new Error(error.message);
-    return { ok: true, token: data.newPassword };
+    // Log out every other device, then start a fresh session here.
+    await auth.revokeAllSessions();
+    return { ok: true, token: await auth.createSession() };
   });
 
 export const adminFunnelReport = createServerFn({ method: "POST" })

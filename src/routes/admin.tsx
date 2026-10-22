@@ -36,6 +36,7 @@ import {
   adminListOrders,
   adminListTestimonials,
   adminLogin,
+  adminLogout,
   adminUpdateOrderStatus,
   adminUpdateSettings,
   adminUpdateStats,
@@ -92,6 +93,7 @@ type Order = {
   tracking_code?: string | null;
   courier_status?: string | null;
   courier_error?: string | null;
+  items?: { key: string; name: string; detail: string; qty: number; unit_price: number; total: number }[];
 };
 
 
@@ -106,10 +108,18 @@ function AdminPage() {
     setToken(t);
   }} />;
 
-  return <Dashboard token={token} onLogout={() => {
-    sessionStorage.removeItem(TOKEN_KEY);
-    setToken(null);
-  }} />;
+  return <Dashboard
+    token={token}
+    onTokenChange={(t) => {
+      sessionStorage.setItem(TOKEN_KEY, t);
+      setToken(t);
+    }}
+    onLogout={() => {
+      void adminLogout({ data: { token } }).catch(() => {});
+      sessionStorage.removeItem(TOKEN_KEY);
+      setToken(null);
+    }}
+  />;
 }
 
 function LoginGate({ onLogin }: { onLogin: (t: string) => void }) {
@@ -128,8 +138,9 @@ function LoginGate({ onLogin }: { onLogin: (t: string) => void }) {
             const res = await login({ data: { password } });
             onLogin(res.token);
             toast.success("লগইন সফল");
-          } catch {
-            toast.error("ভুল পাসওয়ার্ড");
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : "";
+            toast.error(msg.includes("১৫ মিনিট") ? msg : "ভুল পাসওয়ার্ড");
           } finally {
             setLoading(false);
           }
@@ -161,7 +172,15 @@ function LoginGate({ onLogin }: { onLogin: (t: string) => void }) {
   );
 }
 
-function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
+function Dashboard({
+  token,
+  onLogout,
+  onTokenChange,
+}: {
+  token: string;
+  onLogout: () => void;
+  onTokenChange: (t: string) => void;
+}) {
   const listOrders = useServerFn(adminListOrders);
   const updateStatus = useServerFn(adminUpdateOrderStatus);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -172,9 +191,14 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
     setLoading(true);
     try {
       const res = await listOrders({ data: { token } });
-      setOrders(res.orders as Order[]);
+      setOrders(res.orders as unknown as Order[]);
     } catch (e) {
       console.error(e);
+      if (e instanceof Error && e.message.includes("Unauthorized")) {
+        toast.error("সেশন শেষ হয়েছে — আবার লগইন করুন");
+        onLogout();
+        return;
+      }
       toast.error("লোড করা যায়নি — লগআউট করে আবার চেষ্টা করুন");
     } finally {
       setLoading(false);
@@ -267,9 +291,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
               settings={settings}
               onSaved={(s) => setSettings(s)}
             />
-            <ChangePasswordDialog token={token} onChanged={(t) => {
-              try { localStorage.setItem(TOKEN_KEY, t); } catch { /* ignore */ }
-            }} />
+            <ChangePasswordDialog token={token} onChanged={onTokenChange} />
             <Button variant="outline" size="sm" onClick={refresh}>
               <RefreshCw className="mr-1.5 h-4 w-4" /> Refresh
             </Button>
@@ -324,7 +346,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
                       <TableHead>Date</TableHead>
                       <TableHead>Customer</TableHead>
                       <TableHead>Phone</TableHead>
-                      <TableHead>District</TableHead>
+                      <TableHead>Products</TableHead>
                       <TableHead>Qty</TableHead>
                       <TableHead>Total</TableHead>
                       <TableHead>Payment</TableHead>
@@ -364,7 +386,15 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
                               {o.phone}
                             </a>
                           </TableCell>
-                          <TableCell>{o.district}</TableCell>
+                          <TableCell className="max-w-[240px] text-xs">
+                            {Array.isArray(o.items) && o.items.length > 0
+                              ? o.items.map((it) => (
+                                  <div key={it.key} className="truncate">
+                                    {it.name} <span className="text-muted-foreground">({it.detail})</span> ×{it.qty}
+                                  </div>
+                                ))
+                              : <div className="truncate">{o.product_name}</div>}
+                          </TableCell>
                           <TableCell>{o.quantity}</TableCell>
                           <TableCell className="font-semibold">৳ {o.total_amount}</TableCell>
                           <TableCell className="uppercase text-xs">{o.payment_method}</TableCell>
@@ -804,12 +834,12 @@ function ChangePasswordDialog({ token, onChanged }: { token: string; onChanged: 
   const [loading, setLoading] = useState(false);
 
   const submit = async () => {
-    if (current !== token) {
-      toast.error("Current password ভুল");
+    if (!current) {
+      toast.error("Current password দিন");
       return;
     }
-    if (next.length < 4) {
-      toast.error("Password অন্তত ৪ অক্ষর দিন");
+    if (next.length < 8) {
+      toast.error("Password অন্তত ৮ অক্ষর দিন");
       return;
     }
     if (next !== confirm) {
@@ -818,13 +848,13 @@ function ChangePasswordDialog({ token, onChanged }: { token: string; onChanged: 
     }
     setLoading(true);
     try {
-      const res = await change({ data: { token, newPassword: next } });
+      const res = await change({ data: { token, currentPassword: current, newPassword: next } });
       onChanged(res.token);
       toast.success("Password পরিবর্তন হয়েছে");
       setOpen(false);
       setCurrent(""); setNext(""); setConfirm("");
-    } catch {
-      toast.error("Password পরিবর্তন করা যায়নি");
+    } catch (e) {
+      toast.error(e instanceof Error && e.message.includes("ভুল") ? "Current password ভুল" : "Password পরিবর্তন করা যায়নি");
     } finally {
       setLoading(false);
     }

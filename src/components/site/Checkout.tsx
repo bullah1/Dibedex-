@@ -26,7 +26,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { supabase } from "@/integrations/supabase/client";
+import { placeOrder } from "@/lib/api/order.functions";
+import { quote } from "@/lib/catalog";
+import { clearCart, setExtraQty, setIncludeDibedex, useCart } from "@/lib/cart";
 import { buildWhatsAppLink, type SiteSettings } from "@/lib/site";
 import {
   PACKAGES,
@@ -58,7 +60,7 @@ const schema = z.object({
   address: z.string().trim().min(5, "সম্পূর্ণ ঠিকানা লিখুন").max(500),
   package_id: z.enum(["p30", "p60", "p90"]),
   quantity: z.number().int().min(1).max(20),
-  payment_method: z.enum(["cod", "bkash", "nagad"]),
+  payment_method: z.literal("cod"),
   order_note: z.string().max(500).optional(),
 });
 
@@ -73,17 +75,17 @@ export function CheckoutSection({
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
-  const [showPayOptions, setShowPayOptions] = useState(false);
+  const honeypotRef = useRef<HTMLInputElement | null>(null);
   const [showNote, setShowNote] = useState(false);
   const [orderSummary, setOrderSummary] = useState<{
-    packageName: string;
-    qty: number;
+    lines: { key: string; name: string; detail: string; qty: number; total: number }[];
     mrp: number;
     price: number;
     savings: number;
     delivery: number;
     total: number;
   } | null>(null);
+  const cart = useCart();
 
   const { pkg: globalPkg } = useSelectedPackage();
 
@@ -105,7 +107,6 @@ export function CheckoutSection({
   });
 
   const qty = watch("quantity") || 1;
-  const payment = watch("payment_method");
   const packageId = (watch("package_id") || DEFAULT_PACKAGE_ID) as PackageId;
 
   const selectedPackage = useMemo(() => getPackage(packageId), [packageId]);
@@ -178,11 +179,17 @@ export function CheckoutSection({
   };
 
   const unitPrice = selectedPackage.price;
-  const mrpUnit = selectedPackage.mrp;
-  const subtotal = qty * unitPrice;
-  const mrpTotal = qty * mrpUnit;
-  const savings = (mrpUnit - unitPrice) * qty;
-  const total = subtotal + settings.delivery_charge;
+  const includeDibedex = cart.includeDibedex || cart.extras.length === 0;
+  const q = quote(
+    includeDibedex ? { package_id: packageId, quantity: qty } : null,
+    cart.extras,
+    settings.delivery_charge,
+  );
+  const subtotal = q.subtotal;
+  const mrpTotal = q.mrpTotal;
+  const savings = q.savings;
+  const total = q.total;
+  const orderLabel = q.lines.map((l) => `${l.name} (${l.detail}) ×${l.qty}`).join(", ");
 
   // Abandoned checkout capture: save lead once a valid phone is typed.
   const wName = watch("full_name");
@@ -197,13 +204,13 @@ export function CheckoutSection({
         full_name: wName || null,
         phone: wPhone,
         address: wAddress || null,
-        package_name: selectedPackage.name,
-        quantity: qty,
+        package_name: orderLabel.slice(0, 300),
+        quantity: q.units || 1,
         total_amount: total,
       });
     }, 1500);
     return () => clearTimeout(t);
-  }, [wName, wPhone, wAddress, selectedPackage.name, qty, total]);
+  }, [wName, wPhone, wAddress, orderLabel, q.units, total]);
 
   const onSubmit = async (values: FormValues) => {
     if (submitting) return;
@@ -222,28 +229,26 @@ export function CheckoutSection({
       currency: "BDT",
     });
     try {
-      const productName = `Dibedex 500 mg — ${selectedPackage.name}`;
-      const { error } = await supabase.from("orders").insert({
-        full_name: values.full_name,
-        phone: values.phone,
-        district: "N/A",
-        address: values.address,
-        quantity: values.quantity,
-        payment_method: values.payment_method,
-        order_note: values.order_note || null,
-        product_name: productName,
-        product_price: unitPrice,
-        delivery_charge: settings.delivery_charge,
-        total_amount: total,
+      await placeOrder({
+        data: {
+          full_name: values.full_name,
+          phone: values.phone,
+          address: values.address,
+          order_note: values.order_note || undefined,
+          dibedex: includeDibedex
+            ? { package_id: values.package_id, quantity: values.quantity }
+            : null,
+          items: cart.extras.map((e) => ({ slug: e.slug, qty: e.qty })),
+          website: honeypotRef.current?.value || undefined,
+        },
       });
-      if (error) throw error;
       doneRef.current = true;
       sendAbandoned({
         full_name: values.full_name,
         phone: values.phone,
         address: values.address,
-        package_name: selectedPackage.name,
-        quantity: values.quantity,
+        package_name: orderLabel.slice(0, 300),
+        quantity: q.units || 1,
         total_amount: total,
         converted: true,
       });
@@ -279,8 +284,7 @@ export function CheckoutSection({
 
       toast.success("অর্ডারটি গ্রহণ করা হয়েছে! আমরা শীঘ্রই কনফার্ম করব।");
       setOrderSummary({
-        packageName: selectedPackage.name,
-        qty: values.quantity,
+        lines: q.lines.map((l) => ({ key: l.key, name: l.name, detail: l.detail, qty: l.qty, total: l.total })),
         mrp: mrpTotal,
         price: subtotal,
         savings,
@@ -289,8 +293,9 @@ export function CheckoutSection({
       });
       setDone(true);
       reset({ quantity: 1, payment_method: "cod", package_id: DEFAULT_PACKAGE_ID });
+      clearCart();
 
-      const waMsg = `আমি Dibedex অর্ডার করতে চাই।\nপ্যাকেজ: ${selectedPackage.name}\nনাম: ${values.full_name}\nমোবাইল: ${values.phone}\nঠিকানা: ${values.address}\nপরিমাণ: ${values.quantity}\nমোট: ৳${total}`;
+      const waMsg = `আমি অর্ডার করেছি।\nপ্রোডাক্ট: ${orderLabel}\nনাম: ${values.full_name}\nমোবাইল: ${values.phone}\nঠিকানা: ${values.address}\nমোট: ৳${total}`;
       window.open(buildWhatsAppLink(settings.whatsapp_number, waMsg), "_blank");
     } catch (err) {
       console.error(err);
@@ -299,7 +304,12 @@ export function CheckoutSection({
         message: err instanceof Error ? err.message : String(err),
         latency_ms: Date.now() - submitStart,
       });
-      toast.error("দুঃখিত! অর্ডার সাবমিট করা যায়নি। আবার চেষ্টা করুন।");
+      const msg = err instanceof Error ? err.message : "";
+      toast.error(
+        msg.includes("RATE_LIMITED")
+          ? "এই নম্বর থেকে অল্প সময়ে অনেক অর্ডার এসেছে। কিছুক্ষণ পর চেষ্টা করুন বা আমাদের কল করুন।"
+          : "দুঃখিত! অর্ডার সাবমিট করা যায়নি। আবার চেষ্টা করুন।",
+      );
     } finally {
       setSubmitting(false);
       setCheckoutSubmitting(false);
@@ -376,9 +386,9 @@ export function CheckoutSection({
               </h3>
             </div>
             <div className="space-y-2.5 p-5 text-sm">
-              <Row label="Product" value="Dibedex 500 mg" />
-              <Row label="Package" value={orderSummary.packageName} />
-              <Row label="Quantity" value={String(orderSummary.qty)} />
+              {orderSummary.lines.map((l) => (
+                <Row key={l.key} label={`${l.name} · ${l.detail} ×${l.qty}`} value={`৳ ${l.total}`} />
+              ))}
               <Divider />
               <Row label="MRP" value={`৳ ${orderSummary.mrp}`} />
               {orderSummary.savings > 0 && (
@@ -491,6 +501,7 @@ export function CheckoutSection({
             className="overflow-hidden rounded-2xl bg-white shadow-sm"
             style={{ borderWidth: 1, borderColor: "#E8E8ED" }}
           >
+            {includeDibedex ? (
             <div className="p-4 md:p-5" style={{ backgroundColor: "#FFFFFF", borderBottom: "1px solid #E8E8ED" }}>
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#0B6B4F" }}>
@@ -593,7 +604,71 @@ export function CheckoutSection({
                   </button>
                 </div>
               </div>
+              {cart.extras.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setIncludeDibedex(false)}
+                  className="mt-2 text-[11px] font-semibold text-slate-500 hover:underline"
+                >
+                  Dibedex ছাড়া শুধু অন্য প্রোডাক্ট অর্ডার করুন
+                </button>
+              )}
             </div>
+            ) : (
+              <div className="flex items-center justify-between gap-3 p-4 md:p-5" style={{ borderBottom: "1px solid #E8E8ED" }}>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold" style={{ color: "#0B6B4F" }}>Dibedex 500 mg</p>
+                  <p className="text-[11px] text-slate-500">এই অর্ডারে যোগ করা নেই</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIncludeDibedex(true)}
+                  className="shrink-0 rounded-lg px-3 py-2 text-xs font-bold text-white"
+                  style={{ backgroundColor: "#0B6B4F" }}
+                >
+                  + যোগ করুন
+                </button>
+              </div>
+            )}
+
+            {cart.extras.length > 0 && (
+              <div className="space-y-2 p-4 md:p-5" style={{ borderBottom: "1px solid #E8E8ED" }}>
+                <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: "#0B6B4F" }}>
+                  অন্যান্য প্রোডাক্ট
+                </p>
+                {q.lines
+                  .filter((l) => !l.key.startsWith("dibedex-"))
+                  .map((l) => (
+                    <div key={l.key} className="flex items-center gap-3 rounded-xl border border-slate-200 p-2.5">
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold text-slate-900">{l.name}</p>
+                        <p className="truncate text-[11px] text-slate-500">
+                          {l.detail} · ৳{l.unit}
+                        </p>
+                      </div>
+                      <div className="inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-white p-0.5">
+                        <button
+                          type="button"
+                          onClick={() => setExtraQty(l.key, l.qty - 1)}
+                          aria-label={`${l.name} কমান`}
+                          className="grid h-7 w-7 place-items-center rounded-md text-slate-700"
+                        >
+                          <Minus className="h-3.5 w-3.5" />
+                        </button>
+                        <span className="min-w-[1.5rem] text-center text-sm font-bold tabular-nums">{l.qty}</span>
+                        <button
+                          type="button"
+                          onClick={() => setExtraQty(l.key, l.qty + 1)}
+                          aria-label={`${l.name} বাড়ান`}
+                          className="grid h-7 w-7 place-items-center rounded-md text-slate-700"
+                        >
+                          <Plus className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            )}
 
             {/* 3 essential fields — stacked, no step labels */}
             <div className="space-y-4 p-5 md:p-6">
@@ -643,68 +718,31 @@ export function CheckoutSection({
                 />
               </Field>
 
-              {/* Payment — default COD, other options collapsed */}
+              {/* Payment — Cash on Delivery only */}
               <div>
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs font-medium text-slate-700">
-                    পেমেন্ট মেথড
-                  </Label>
-                  <button
-                    type="button"
-                    onClick={() => setShowPayOptions((v) => !v)}
-                    className="text-[11px] font-semibold hover:underline"
-                    style={{ color: "#0B6B4F" }}
-                  >
-                    {showPayOptions ? "লুকান" : "অন্য অপশন"}
-                  </button>
-                </div>
-
-                {!showPayOptions ? (
-                  <div
-                    className="mt-1.5 flex items-center gap-2 rounded-xl p-3"
-                    style={{ borderWidth: 2, borderColor: "#0B6B4F", backgroundColor: "#FDF6E3" }}
-                  >
-                    <CheckCircle2 className="h-5 w-5" strokeWidth={2.5} style={{ color: "#0B6B4F" }} />
-                    <div className="text-sm font-semibold" style={{ color: "#0B6B4F" }}>
-                      ক্যাশ অন ডেলিভারি
-                    </div>
-                    <span
-                      className="ml-auto rounded-md px-2 py-0.5 text-[10px] font-bold text-white"
-                      style={{ backgroundColor: "#0B6B4F" }}
-                    >
-                      Recommended
-                    </span>
+                <Label className="text-xs font-medium text-slate-700">পেমেন্ট মেথড</Label>
+                <div
+                  className="mt-1.5 flex items-center gap-2 rounded-xl p-3"
+                  style={{ borderWidth: 2, borderColor: "#0B6B4F", backgroundColor: "#FDF6E3" }}
+                >
+                  <CheckCircle2 className="h-5 w-5" strokeWidth={2.5} style={{ color: "#0B6B4F" }} />
+                  <div className="text-sm font-semibold" style={{ color: "#0B6B4F" }}>
+                    ক্যাশ অন ডেলিভারি
                   </div>
-                ) : (
-                  <RadioGroup
-                    value={payment}
-                    onValueChange={(v) =>
-                      setValue("payment_method", v as FormValues["payment_method"])
-                    }
-                    className="mt-1.5 grid gap-2 sm:grid-cols-3"
-                  >
-                    {[
-                      { v: "cod", label: "ক্যাশ অন ডেলিভারি" },
-                      { v: "bkash", label: "bKash" },
-                      { v: "nagad", label: "Nagad" },
-                    ].map((opt) => (
-                      <label
-                        key={opt.v}
-                        className="flex cursor-pointer items-center gap-2 rounded-xl p-3 text-sm transition-colors"
-                        style={{
-                          borderWidth: 2,
-                          borderColor: payment === opt.v ? "#0B6B4F" : "#E8E8ED",
-                          backgroundColor: payment === opt.v ? "#FDF6E3" : "white",
-                        }}
-                      >
-                        <RadioGroupItem value={opt.v} />
-                        <span className="font-medium" style={{ color: "#0B6B4F" }}>{opt.label}</span>
-                      </label>
-                    ))}
-                  </RadioGroup>
-                )}
-
+                  <span className="ml-auto text-[11px] text-slate-500">পণ্য হাতে পেয়ে টাকা দিন</span>
+                </div>
               </div>
+
+              {/* Honeypot: hidden from people, bots fill it */}
+              <input
+                ref={honeypotRef}
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="absolute -left-[9999px] h-0 w-0 opacity-0"
+              />
 
               {/* Optional note — collapsed */}
               <div>
@@ -749,9 +787,9 @@ export function CheckoutSection({
             </div>
 
             <div className="space-y-2.5 p-5 text-sm">
-              <Row label="Product" value="Dibedex 500 mg" />
-              <Row label="Package" value={selectedPackage.name} />
-              <Row label="Quantity" value={String(qty)} />
+              {q.lines.map((l) => (
+                <Row key={l.key} label={`${l.name} · ${l.detail} ×${l.qty}`} value={`৳ ${l.total}`} />
+              ))}
               <Divider />
               <Row label="MRP" value={`৳ ${mrpTotal}`} />
               {savings > 0 && (
