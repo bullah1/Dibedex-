@@ -28,7 +28,11 @@ export const Route = createFileRoute("/product/$slug")({
       return { meta: [{ title: "Product not found" }, { name: "robots", content: "noindex" }] };
     const p = loaderData.product;
     const url = `https://dibedex.com/product/${p.slug}`;
-    const img = p.image?.startsWith("/") ? `https://dibedex.com${p.image}` : undefined;
+    const img = p.image?.startsWith("/")
+      ? `https://dibedex.com${p.image}`
+      : p.image?.startsWith("https://")
+        ? p.image
+        : undefined;
     const title = `${productTitle(p)} ${p.pack} — Price in Bangladesh | ${p.name} দাম ও অর্ডার`;
     const desc = `${p.name}${p.generic ? ` (${p.generic})` : ""} — ${MANUFACTURER_BN}-এর আয়ুর্বেদিক ${FORM_LABEL[p.form]}, ${p.pack}। দাম ৳${p.price}${p.mrp && p.mrp > p.price ? ` (MRP ৳${p.mrp})` : ""}। সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।`;
     return {
