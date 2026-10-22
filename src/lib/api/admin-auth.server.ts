@@ -90,7 +90,10 @@ export async function checkPassword(password: string): Promise<boolean> {
 
   await db
     .from("admin_config")
-    .update({ password_hash: await hashPassword(password), admin_password: "" })
+    // Keep admin_password untouched: the old site (dibedex.com) still reads it, and
+    // when it is empty the old code falls back to the published default password.
+    // Clear it only after dibedex.com runs this new code (see migrations README).
+    .update({ password_hash: await hashPassword(password) })
     .eq("id", 1);
   return true;
 }

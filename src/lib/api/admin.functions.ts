@@ -300,7 +300,10 @@ export const adminChangePassword = createServerFn({ method: "POST" })
       .from("admin_config")
       .update({
         password_hash: await auth.hashPassword(data.newPassword),
-        admin_password: "",
+        // Mirror into the legacy column while the old site (dibedex.com) is still
+        // live, so both admin panels accept the same password and the old code
+        // never falls back to its built-in default. Remove after the switch.
+        admin_password: data.newPassword,
         updated_at: new Date().toISOString(),
       })
       .eq("id", 1);
