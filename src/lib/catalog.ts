@@ -437,7 +437,7 @@ export function quote(dibedex: DibedexLine, extras: CartExtra[], deliveryCharge:
       lines.push({
         key: `dibedex-${pkg.id}`,
         name: "Dibedex 500 mg",
-        detail: pkg.name,
+        detail: pkg.contents ? `${pkg.name} · ${pkg.contents}` : pkg.name,
         qty,
         unit: pkg.price,
         mrp: pkg.mrp,

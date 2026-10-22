@@ -543,6 +543,14 @@ export function CheckoutSection({
                       >
                         {pkg.capsules} Capsules
                       </div>
+                      {pkg.short && (
+                        <div
+                          className="text-[9px] font-medium"
+                          style={{ color: isActive ? "rgba(255,255,255,0.8)" : "#64748b" }}
+                        >
+                          {pkg.short}
+                        </div>
+                      )}
                       <div
                         className="mt-0.5 text-lg font-extrabold leading-none tabular-nums"
                         style={{ fontFamily: SANS_PREMIUM, color: isActive ? "white" : "#0B6B4F" }}

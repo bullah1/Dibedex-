@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { track } from "./analytics";
+import boxImg from "@/assets/packs/dibedex-60-box.webp";
 
 export type PackageId = "p30" | "p60" | "p90";
 
@@ -12,6 +13,14 @@ export type Package = {
   badge?: string;
   highlight?: boolean;
   tag?: string;
+  /** What is physically in the parcel, shown under the package name */
+  contents?: string;
+  /** Very short version for tight spaces (checkout tiles) */
+  short?: string;
+  /** Photo for this package (falls back to the main Dibedex photo) */
+  image?: string;
+  /** Small label on the photo, e.g. "+ স্ট্রিপ" */
+  imageNote?: string;
 };
 
 export const PACKAGES: Package[] = [
@@ -24,6 +33,9 @@ export const PACKAGES: Package[] = [
     mrp: 900,
     badge: "Best Value",
     tag: "সাশ্রয়ী",
+    contents: "১টি বক্স (৬০ ক্যাপসুল)",
+    short: "১ বক্স",
+    image: boxImg,
   },
   {
     id: "p90",
@@ -34,6 +46,10 @@ export const PACKAGES: Package[] = [
     badge: "Most Popular",
     highlight: true,
     tag: "সর্বোচ্চ সাশ্রয়",
+    contents: "১টি বক্স (৬০) + স্ট্রিপ (৩০ ক্যাপসুল)",
+    short: "বক্স + স্ট্রিপ",
+    image: boxImg,
+    imageNote: "বক্স + স্ট্রিপ",
   },
 ];
 
@@ -80,7 +96,6 @@ export function useSelectedPackage(): { pkg: Package; id: PackageId } {
     window.addEventListener(PACKAGE_EVENT, h);
     return () => window.removeEventListener(PACKAGE_EVENT, h);
   }, []);
-
 
   return { pkg: getPackage(id), id };
 }

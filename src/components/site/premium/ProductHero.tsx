@@ -25,8 +25,9 @@ export function ProductHero({ whatsappNumber }: { whatsappNumber: string }) {
             style={{ backgroundColor: "#F5F5F7" }}
           >
             <img
-              src={DIBEDEX_IMG}
-              alt="Dibedex 500 mg ক্যাপসুল — বোতল ও বক্স"
+              key={pkg.id}
+              src={pkg.image ?? DIBEDEX_IMG}
+              alt={`Dibedex 500 mg — ${pkg.contents ?? pkg.name}`}
               width={512}
               height={512}
               fetchPriority="high"
@@ -40,6 +41,14 @@ export function ProductHero({ whatsappNumber }: { whatsappNumber: string }) {
             >
               {off}% OFF
             </span>
+            {pkg.imageNote && (
+              <span
+                className="absolute bottom-4 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-3.5 py-1.5 text-[12px] font-semibold text-white shadow-md"
+                style={{ backgroundColor: ACCENT }}
+              >
+                {pkg.imageNote}
+              </span>
+            )}
           </div>
         </div>
 
@@ -114,6 +123,11 @@ export function ProductHero({ whatsappNumber }: { whatsappNumber: string }) {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block text-[15px] font-semibold">{p.name}</span>
+                      {p.contents && (
+                        <span className="block text-[12px]" style={{ color: SUBTLE }}>
+                          {p.contents}
+                        </span>
+                      )}
                       {p.badge && (
                         <span className="text-[12px] font-medium" style={{ color: ACCENT }}>
                           {p.badge}
