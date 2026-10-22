@@ -2,9 +2,15 @@
  * Index Laboratories Ltd. — other products sold alongside Dibedex.
  *
  * Price rule: MRP from the brand listing, selling price = MRP − 10%.
- * Edit `price` / `mrp` freely. Add a photo with `image: "/products/xxx.webp"`
- * (put the file in /public/products/). Add your own Bangla `description`
- * whenever you can — unique text on each product page helps SEO.
+ * Edit `price` / `mrp` freely.
+ *
+ * PHOTOS: drop a file named after the product's slug into
+ * src/assets/products/ (e.g. arjunarin-450ml.webp or .jpg/.png) and it shows
+ * up automatically on the cards, the product page and in Google's product
+ * data. No code change needed. Products without a photo show a styled tile.
+ *
+ * Add your own Bangla `description` whenever you can — unique text on each
+ * product page helps SEO.
  */
 import { PACKAGES, type PackageId } from "@/lib/packages";
 
@@ -39,8 +45,25 @@ export const FORM_LABEL: Record<ProductForm, string> = {
 
 const off = (mrp: number) => Math.round(mrp * 0.9);
 
+// Every image in src/assets/products/, keyed by file name without extension (= slug).
+const PHOTO_FILES = import.meta.glob("../assets/products/*.{webp,jpg,jpeg,png}", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Record<string, string>;
+const PHOTOS = new Map(
+  Object.entries(PHOTO_FILES).map(([path, url]) => [
+    (path.split("/").pop() ?? "").replace(/\.[^.]+$/, "").toLowerCase(),
+    url,
+  ]),
+);
+
 type Row = Omit<CatalogItem, "price"> & { price?: number };
-const p = (r: Row): CatalogItem => ({ ...r, price: r.price ?? off(r.mrp ?? 0) });
+const p = (r: Row): CatalogItem => ({
+  ...r,
+  price: r.price ?? off(r.mrp ?? 0),
+  image: r.image ?? PHOTOS.get(r.slug),
+});
 
 export const PRODUCTS: CatalogItem[] = [
   // ── Capsules ──────────────────────────────────────────────

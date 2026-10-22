@@ -28,6 +28,7 @@ export const Route = createFileRoute("/product/$slug")({
       return { meta: [{ title: "Product not found" }, { name: "robots", content: "noindex" }] };
     const p = loaderData.product;
     const url = `https://dibedex.com/product/${p.slug}`;
+    const img = p.image?.startsWith("/") ? `https://dibedex.com${p.image}` : undefined;
     const title = `${productTitle(p)} ${p.pack} — Price in Bangladesh | ${p.name} দাম ও অর্ডার`;
     const desc = `${p.name}${p.generic ? ` (${p.generic})` : ""} — ${MANUFACTURER_BN}-এর আয়ুর্বেদিক ${FORM_LABEL[p.form]}, ${p.pack}। দাম ৳${p.price}${p.mrp && p.mrp > p.price ? ` (MRP ৳${p.mrp})` : ""}। সারা বাংলাদেশে ক্যাশ অন ডেলিভারি।`;
     return {
@@ -39,7 +40,7 @@ export const Route = createFileRoute("/product/$slug")({
         { property: "og:description", content: desc },
         { property: "og:url", content: url },
         { property: "og:type", content: "product" },
-        ...(p.image ? [{ property: "og:image", content: `https://dibedex.com${p.image}` }] : []),
+        ...(img ? [{ property: "og:image", content: img }] : []),
         { property: "product:price:amount", content: String(p.price) },
         { property: "product:price:currency", content: "BDT" },
       ],
@@ -52,7 +53,7 @@ export const Route = createFileRoute("/product/$slug")({
             "@type": "Product",
             "@id": `${url}#product`,
             name: `${p.name} ${p.pack}`,
-            ...(p.image ? { image: [`https://dibedex.com${p.image}`] } : {}),
+            ...(img ? { image: [img] } : {}),
             description: desc,
             sku: p.slug,
             brand: { "@type": "Brand", name: p.name },
