@@ -1,5 +1,5 @@
 import { ShieldCheck, Truck, Star } from "lucide-react";
-import realAsset from "@/assets/dibedex-real.webp.asset.json";
+import { DIBEDEX_IMG } from "@/lib/dibedex-image";
 import { useSelectedPackage } from "@/lib/packages";
 
 const CREAM = "#FDFCF0";
@@ -44,7 +44,10 @@ export function Hero(_props: { whatsappNumber: string; price?: number }) {
           >
             ডায়াবেটিস নিয়ন্ত্রণে
             <br />
-            ডাইবেডেক্স <span className="italic" style={{ color: GOLD }}>৫০০মিগ্রা</span>
+            ডাইবেডেক্স{" "}
+            <span className="italic" style={{ color: GOLD }}>
+              ৫০০মিগ্রা
+            </span>
           </h1>
           <div className="mt-3 flex items-center justify-center gap-1.5">
             <div className="flex" style={{ color: GOLD }}>
@@ -72,7 +75,7 @@ export function Hero(_props: { whatsappNumber: string; price?: number }) {
               style={{ borderColor: BORDER, borderWidth: 1 }}
             >
               <img
-                src={realAsset.url}
+                src={DIBEDEX_IMG}
                 alt="Dibedex 500 mg বোতল ও বক্স"
                 width={512}
                 height={512}
@@ -106,9 +109,7 @@ export function Hero(_props: { whatsappNumber: string; price?: number }) {
                 >
                   ৳{pkg.price}
                 </span>
-                <span className="text-xs text-slate-400 line-through md:text-sm">
-                  ৳{pkg.mrp}
-                </span>
+                <span className="text-xs text-slate-400 line-through md:text-sm">৳{pkg.mrp}</span>
               </div>
               <span
                 className="mt-1.5 inline-block rounded-md px-2 py-0.5 text-[10px] font-bold uppercase"

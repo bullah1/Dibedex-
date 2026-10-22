@@ -10,6 +10,7 @@ import { ProductDetails } from "@/components/site/premium/ProductDetails";
 import { ReviewsGallery } from "@/components/site/premium/ReviewsGallery";
 import { PremiumFaq } from "@/components/site/premium/PremiumFaq";
 import { MoreProducts } from "@/components/site/MoreProducts";
+import { DIBEDEX_IMG, DIBEDEX_IMG_ABS } from "@/lib/dibedex-image";
 import { CheckoutModal } from "@/components/site/CheckoutModal";
 import { MobileStickyBar, FloatingWhatsApp } from "@/components/site/StickyBars";
 import {
@@ -23,13 +24,11 @@ import { useAnalyticsAutoTrack } from "@/lib/analytics";
 import { AdSlot } from "@/components/site/AdSlot";
 import { ADSENSE_SLOTS } from "@/lib/adsense";
 
-
 const PRODUCT_TITLE =
   "Dibedex 500 — Price in Bangladesh, Review, Side Effects (Bangla) | ডিবেডেক্স ৫০০ ক্যাপসুল অর্ডার";
 const PRODUCT_DESC =
   "Dibedex 500 mg Capsule — জামুন বীজের নির্যাসে তৈরি Ayurvedic ডায়াবেটিস সাপোর্ট। Dibedex 500 price in Bangladesh ৳৩৫০ থেকে শুরু। Review, side effects (bangla), সঠিক নিয়মে সেবন ও অর্ডার — সারা বাংলাদেশে Cash on Delivery।";
-const PRODUCT_IMG =
-  "https://dibedex.com/__l5e/assets-v1/8eb85126-2eb4-4bfd-8ec7-dfa0773f55e2/dibedex-real.webp";
+const PRODUCT_IMG = DIBEDEX_IMG_ABS;
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -77,7 +76,7 @@ export const Route = createFileRoute("/")({
       {
         rel: "preload",
         as: "image",
-        href: "/__l5e/assets-v1/8eb85126-2eb4-4bfd-8ec7-dfa0773f55e2/dibedex-real.webp",
+        href: DIBEDEX_IMG,
         fetchPriority: "high",
       },
     ],
@@ -111,7 +110,11 @@ export const Route = createFileRoute("/")({
           mpn: "DBX-SYZ-500",
           description:
             "Ayurvedic ডায়াবেটিস সাপোর্ট ক্যাপসুল। প্রাকৃতিক জামুন (Syzygium Jambolanum) বীজের নির্যাসে তৈরি — ব্লাড সুগার ম্যানেজমেন্ট, স্বাস্থ্যকর জীবনযাপন ও ডাক্তারের নির্দেশিত রুটিনের সহায়ক।",
-          audience: { "@type": "PeopleAudience", suggestedMinAge: 18, geographicArea: { "@type": "Country", name: "Bangladesh" } },
+          audience: {
+            "@type": "PeopleAudience",
+            suggestedMinAge: 18,
+            geographicArea: { "@type": "Country", name: "Bangladesh" },
+          },
           productID: "dbx-syz-500-30",
           inProductGroupWithID: "dbx-syz-500",
           offers: [
@@ -146,8 +149,18 @@ export const Route = createFileRoute("/")({
               shippingDestination: { "@type": "DefinedRegion", addressCountry: "BD" },
               deliveryTime: {
                 "@type": "ShippingDeliveryTime",
-                handlingTime: { "@type": "QuantitativeValue", minValue: 0, maxValue: 1, unitCode: "DAY" },
-                transitTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 5, unitCode: "DAY" },
+                handlingTime: {
+                  "@type": "QuantitativeValue",
+                  minValue: 0,
+                  maxValue: 1,
+                  unitCode: "DAY",
+                },
+                transitTime: {
+                  "@type": "QuantitativeValue",
+                  minValue: 1,
+                  maxValue: 5,
+                  unitCode: "DAY",
+                },
               },
             },
           })),
@@ -275,8 +288,12 @@ function LandingPage() {
   useAnalyticsAutoTrack();
 
   useEffect(() => {
-    fetchSettings().then(setSettings).catch(() => {});
-    fetchTestimonials().then(setTestimonials).catch(() => {});
+    fetchSettings()
+      .then(setSettings)
+      .catch(() => {});
+    fetchTestimonials()
+      .then(setTestimonials)
+      .catch(() => {});
   }, []);
 
   return (
@@ -288,17 +305,11 @@ function LandingPage() {
         <BenefitsGrid />
         <ProductDetails />
         <ReviewsGallery testimonials={testimonials} />
-        <PremiumFaq
-          callNumber={settings.call_number}
-          whatsappNumber={settings.whatsapp_number}
-        />
+        <PremiumFaq callNumber={settings.call_number} whatsappNumber={settings.whatsapp_number} />
         <MoreProducts />
       </main>
       <AdSlot slot={ADSENSE_SLOTS.homeFooter} />
-      <SiteFooter
-        callNumber={settings.call_number}
-        whatsappNumber={settings.whatsapp_number}
-      />
+      <SiteFooter callNumber={settings.call_number} whatsappNumber={settings.whatsapp_number} />
       <MobileStickyBar
         callNumber={settings.call_number}
         whatsappNumber={settings.whatsapp_number}
@@ -310,4 +321,3 @@ function LandingPage() {
     </div>
   );
 }
-

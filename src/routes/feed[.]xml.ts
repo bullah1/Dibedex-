@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { DIBEDEX_IMG_ABS } from "@/lib/dibedex-image";
 
 // Google Merchant Center product feed (RSS 2.0 + g: namespace).
 // Submit this URL in Merchant Center → Products → Feeds → Add Feed.
@@ -7,7 +8,7 @@ export const Route = createFileRoute("/feed.xml")({
     handlers: {
       GET: async () => {
         const BASE = "https://dibedex.com";
-        const IMG = `${BASE}/__l5e/assets-v1/8eb85126-2eb4-4bfd-8ec7-dfa0773f55e2/dibedex-real.webp`;
+        const IMG = DIBEDEX_IMG_ABS;
         const BRAND = "Dibedex";
 
         type Item = {
@@ -18,14 +19,33 @@ export const Route = createFileRoute("/feed.xml")({
           capsules: number;
         };
         const items: Item[] = [
-          { id: "dbx-syz-500-30", title: "Dibedex 500 mg — 30 Capsules", price: 350, mpn: "DBX-SYZ-500-30", capsules: 30 },
-          { id: "dbx-syz-500-60", title: "Dibedex 500 mg — 60 Capsules (Best Value)", price: 650, mpn: "DBX-SYZ-500-60", capsules: 60 },
-          { id: "dbx-syz-500-90", title: "Dibedex 500 mg — 90 Capsules (Most Popular)", price: 950, mpn: "DBX-SYZ-500-90", capsules: 90 },
+          {
+            id: "dbx-syz-500-30",
+            title: "Dibedex 500 mg — 30 Capsules",
+            price: 350,
+            mpn: "DBX-SYZ-500-30",
+            capsules: 30,
+          },
+          {
+            id: "dbx-syz-500-60",
+            title: "Dibedex 500 mg — 60 Capsules (Best Value)",
+            price: 650,
+            mpn: "DBX-SYZ-500-60",
+            capsules: 60,
+          },
+          {
+            id: "dbx-syz-500-90",
+            title: "Dibedex 500 mg — 90 Capsules (Most Popular)",
+            price: 950,
+            mpn: "DBX-SYZ-500-90",
+            capsules: 90,
+          },
         ];
 
         const esc = (s: string) =>
-          s.replace(/[&<>"']/g, (c) =>
-            ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" }[c]!),
+          s.replace(
+            /[&<>"']/g,
+            (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&apos;" })[c]!,
           );
 
         const desc =

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BadgeCheck, Flame, ShieldCheck, Truck } from "lucide-react";
-import realAsset from "@/assets/dibedex-real.webp.asset.json";
+import { DIBEDEX_IMG } from "@/lib/dibedex-image";
 import front from "@/assets/product-front.jpg";
 import angle from "@/assets/product-angle.jpg";
 import lifestyle from "@/assets/product-lifestyle.jpg";
@@ -9,7 +9,7 @@ import lifestyle from "@/assets/product-lifestyle.jpg";
 // then front-of-bottle (clear label), capsules (what you actually get),
 // lifestyle/ingredient (emotional + natural proof).
 const images = [
-  { src: realAsset.url, alt: "Dibedex 500 mg বোতল ও বক্স", label: "প্যাকেজ" },
+  { src: DIBEDEX_IMG, alt: "Dibedex 500 mg বোতল ও বক্স", label: "প্যাকেজ" },
   { src: front, alt: "Dibedex 500 mg bottle front view", label: "বোতল" },
   { src: angle, alt: "Dibedex Syzygium capsules close-up", label: "ক্যাপসুল" },
   { src: lifestyle, alt: "Dibedex Syzygium with natural jamun herbs", label: "উপাদান" },
@@ -94,9 +94,7 @@ export function ProductGallery() {
             onClick={() => setActive(i)}
             aria-label={img.label}
             className={`group overflow-hidden rounded-xl bg-white p-1.5 shadow-sm transition-all ${
-              active === i
-                ? "ring-2 ring-primary"
-                : "ring-1 ring-border hover:ring-primary/40"
+              active === i ? "ring-2 ring-primary" : "ring-1 ring-border hover:ring-primary/40"
             }`}
           >
             <img

@@ -1,5 +1,5 @@
 import { Star, ShoppingBag, MessageCircle, Check } from "lucide-react";
-import realAsset from "@/assets/dibedex-real.webp.asset.json";
+import { DIBEDEX_IMG } from "@/lib/dibedex-image";
 import { PACKAGES, selectPackage, useSelectedPackage } from "@/lib/packages";
 import { buildWhatsAppLink } from "@/lib/site";
 import { track } from "@/lib/analytics";
@@ -16,11 +16,7 @@ export function ProductHero({ whatsappNumber }: { whatsappNumber: string }) {
   );
 
   return (
-    <section
-      id="home"
-      className="bg-white"
-      style={{ fontFamily: SANS, color: INK }}
-    >
+    <section id="home" className="bg-white" style={{ fontFamily: SANS, color: INK }}>
       <div className="mx-auto max-w-5xl px-5 pt-6 pb-10 md:grid md:grid-cols-2 md:items-start md:gap-14 md:pt-14 md:pb-16">
         {/* Product image */}
         <div className="md:sticky md:top-24">
@@ -29,7 +25,7 @@ export function ProductHero({ whatsappNumber }: { whatsappNumber: string }) {
             style={{ backgroundColor: "#F5F5F7" }}
           >
             <img
-              src={realAsset.url}
+              src={DIBEDEX_IMG}
               alt="Dibedex 500 mg ক্যাপসুল — বোতল ও বক্স"
               width={512}
               height={512}
@@ -55,9 +51,7 @@ export function ProductHero({ whatsappNumber }: { whatsappNumber: string }) {
           >
             Ayurvedic Diabetes Support
           </p>
-          <h1
-            className="mt-2 text-[30px] font-semibold leading-[1.15] tracking-[-0.02em] md:text-[42px]"
-          >
+          <h1 className="mt-2 text-[30px] font-semibold leading-[1.15] tracking-[-0.02em] md:text-[42px]">
             Dibedex 500 mg
           </h1>
 
@@ -68,8 +62,8 @@ export function ProductHero({ whatsappNumber }: { whatsappNumber: string }) {
           </div>
 
           <p className="mt-4 text-[15px] leading-relaxed" style={{ color: SUBTLE }}>
-            প্রাকৃতিক জামুন বীজের নির্যাসে তৈরি আয়ুর্বেদিক ক্যাপসুল — স্বাস্থ্যকর
-            ব্লাড সুগার ম্যানেজমেন্ট ও দৈনন্দিন এনার্জির সহায়ক।
+            প্রাকৃতিক জামুন বীজের নির্যাসে তৈরি আয়ুর্বেদিক ক্যাপসুল — স্বাস্থ্যকর ব্লাড সুগার
+            ম্যানেজমেন্ট ও দৈনন্দিন এনার্জির সহায়ক।
           </p>
 
           {/* Price */}
@@ -162,7 +156,11 @@ export function ProductHero({ whatsappNumber }: { whatsappNumber: string }) {
               className="flex h-[52px] w-full items-center justify-center gap-2 rounded-full text-[16px] font-semibold transition-colors"
               style={{ border: `1.5px solid ${HAIRLINE}`, color: INK }}
             >
-              <MessageCircle className="h-[18px] w-[18px]" strokeWidth={2.2} style={{ color: "#25D366" }} />
+              <MessageCircle
+                className="h-[18px] w-[18px]"
+                strokeWidth={2.2}
+                style={{ color: "#25D366" }}
+              />
               WhatsApp-এ কথা বলুন
             </a>
           </div>
